@@ -1,0 +1,10 @@
+*.pyc
+*~
+**/__pycache__
+/.pytest_cache
+env
+/media*
+/staticfiles
+.DS_Store
+/.idea
+**/.env
