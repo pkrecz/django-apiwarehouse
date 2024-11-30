@@ -46,13 +46,13 @@ class MaterialModel(models.Model):
 """ HandlingUnit Model """
 class HandlingUnitModel(models.Model):
 
-    id_hu = models.AutoField(
+    id_handlingunit = models.AutoField(
                                 primary_key=True)
     material = models.ForeignKey(
                                 to="MaterialModel",
                                 related_name="material_hu",
                                 on_delete=models.PROTECT)
-    pce = models.IntegerField(
+    quantity = models.IntegerField(
                                 validators=[MinValueValidator(1)])
     weight = models.DecimalField(
                                 max_digits=9,
@@ -82,7 +82,7 @@ class BinModel(models.Model):
                                 max_length=15,
                                 blank=True,
                                 null=True)
-    hu = models.OneToOneField(
+    handlingunit = models.OneToOneField(
                                 to="HandlingUnitModel",
                                 related_name="bin_hu",
                                 blank=True,
@@ -106,7 +106,7 @@ class TaskModel(models.Model):
 
     id_task = models.AutoField(
                                 primary_key=True)
-    hu = models.ForeignKey(
+    handlingunit = models.ForeignKey(
                                 to="HandlingUnitModel",
                                 related_name="task_hu",
                                 on_delete=models.PROTECT)

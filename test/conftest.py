@@ -6,10 +6,9 @@ from django.contrib.auth.models import User
 
 
 # Preparing envoirment for testing
-@pytest.fixture()
-def db_no_rollback(request, django_db_setup, django_db_blocker):
-    django_db_blocker.unblock()
-    request.addfinalizer(django_db_blocker.restore)
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db): 
+    pass
 
 
 @pytest.fixture()
@@ -17,11 +16,6 @@ def db_access_without_rollback_and_truncate(request, django_db_setup, django_db_
     django_db_blocker.unblock()
     yield
     django_db_blocker.restore()
-
-
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db): 
-    pass
 
 
 @pytest.fixture()
@@ -64,3 +58,17 @@ def data_test_update_bin():
     return {
             "type": "EL",
             "verification_field": "ABc123!"}
+
+
+@pytest.fixture()
+def data_test_create_GR_ZONE_bin():
+    return {
+            "id_bin": "GR-ZONE",
+            "verification_field": "xYz123@"}
+
+
+@pytest.fixture()
+def data_test_goods_receipt():
+    return {
+            "material": "BDP100I",
+            "quantity": 3}

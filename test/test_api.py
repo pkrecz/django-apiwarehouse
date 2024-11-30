@@ -11,11 +11,11 @@ def sub_test_create_material(client, input_data):
 	response_json = response.json()
 	logging.info("Creation material testing ...")
 	assert response.status_code == 201
-	assert response_json["material"] == "BDP100I"
-	assert response_json["description"] == "Metronomis gen. 2"
-	assert response_json["weight"] == "1.25"
+	assert response_json["material"] == input_data["material"]
+	assert response_json["description"] == input_data["description"]
+	assert response_json["weight"] == str(input_data["weight"])
 	assert response_json["weight_uom"] == "KG"
-	assert response_json["volume"] == "0.65"
+	assert response_json["volume"] == str(input_data["volume"])
 	assert response_json["volume_uom"] == "CDM"
 	assert response_json["created_by"] is not None
 	assert response_json["created_on"] is not None
@@ -24,26 +24,25 @@ def sub_test_create_material(client, input_data):
 
 
 def sub_test_update_material(client, input_data):
-	id_material = os.environ["MATERIAL_ID"]
-	url = reverse("materials-detail", kwargs={"pk": int(id_material)})
+	id_material = int(os.environ["MATERIAL_ID"])
+	url = reverse("materials-detail", kwargs={"pk": id_material})
 	response = client.put(path=url, data=input_data, format="json")
 	response_json = response.json()
 	logging.info("Update material testing ...")
 	assert response.status_code == 200
-	assert response_json["material"] == "BDP100I"
-	assert response_json["description"] == "Metronomis gen. 2 100W"
-	assert response_json["weight"] == "1000.45"
-	assert response_json["weight_uom"] == "G"
-	assert response_json["volume"] == "0.08"
-	assert response_json["volume_uom"] == "M3"
+	assert response_json["description"] == input_data["description"]
+	assert response_json["weight"] == str(input_data["weight"])
+	assert response_json["weight_uom"] == input_data["weight_uom"]
+	assert response_json["volume"] == str(input_data["volume"])
+	assert response_json["volume_uom"] == input_data["volume_uom"]
 	assert response_json["created_by"] is not None
 	assert response_json["created_on"] is not None
 	logging.info("Update material testing finished.")
 
 
 def sub_test_delete_material(client):
-	id_material = os.environ["MATERIAL_ID"]
-	url = reverse("materials-detail", kwargs={"pk": int(id_material)})
+	id_material = int(os.environ["MATERIAL_ID"])
+	url = reverse("materials-detail", kwargs={"pk": id_material})
 	response = client.delete(path=url)
 	response_json = response.json()
 	logging.info("Deletion material testing ...")
@@ -58,10 +57,10 @@ def sub_test_create_bin(client, input_data):
 	response_json = response.json()
 	logging.info("Creation bin testing ...")
 	assert response.status_code == 201
-	assert response_json["id_bin"] == "0510-P05-A4"
+	assert response_json["id_bin"] == input_data["id_bin"]
 	assert response_json["type"] == "ST"
-	assert response_json["verification_field"] == "xYz123@"
-	assert response_json["hu"] is None
+	assert response_json["verification_field"] == input_data["verification_field"]
+	assert response_json["handlingunit"] is None
 	assert response_json["empty"] is True
 	logging.info("Creation bin testing finished.")
 	os.environ["BIN_ID"] = str(response_json["id_bin"])
@@ -69,15 +68,15 @@ def sub_test_create_bin(client, input_data):
 
 def sub_test_update_bin(client, input_data):
 	id_bin = os.environ["BIN_ID"]
-	url = reverse("bins-detail", kwargs={"pk": str(id_bin)})
+	url = reverse("bins-detail", kwargs={"pk": id_bin})
 	response = client.put(path=url, data=input_data, format="json")
 	response_json = response.json()
 	logging.info("Update bin testing ...")
 	assert response.status_code == 200
-	assert response_json["id_bin"] == "0510-P05-A4"
-	assert response_json["type"] == "EL"
-	assert response_json["verification_field"] == "ABc123!"
-	assert response_json["hu"] is None
+	assert response_json["id_bin"] == id_bin
+	assert response_json["type"] == input_data["type"]
+	assert response_json["verification_field"] == input_data["verification_field"]
+	assert response_json["handlingunit"] is None
 	assert response_json["empty"] is True
 	assert response_json["created_by"] is not None
 	assert response_json["created_on"] is not None
@@ -86,13 +85,37 @@ def sub_test_update_bin(client, input_data):
 
 def sub_test_delete_bin(client):
 	id_bin = os.environ["BIN_ID"]
-	url = reverse("bins-detail", kwargs={"pk": str(id_bin)})
+	url = reverse("bins-detail", kwargs={"pk": id_bin})
 	response = client.delete(path=url)
 	response_json = response.json()
 	logging.info("Deletion bin testing ...")
 	assert response.status_code == 200
 	assert response_json == {"message": "Bin has been deleted."}
 	logging.info("Deletion bin testing finished.")
+
+
+def sub_test_goods_receipt(client, input_data):
+	url = reverse("goodsreceipts-list")
+	response = client.post(path=url, data=input_data, format="json")
+	response_json = response.json()
+	logging.info("Goods Receipt testing ...")
+	assert response.status_code == 200
+	assert response_json == {"message": "Goods Receipt completed."}
+	logging.info("Goods Receipt testing finished.")
+
+
+def sub_test_create_task(client, input_data):
+	url = reverse("tasks-list")
+	response = client.get(path=url)
+	response_json = response.json()["results"][0]
+	logging.info("Creation task testing ...")
+	assert response.status_code == 200
+	assert response_json["handlingunit"] is not None
+	assert response_json["source_bin"] == "GR-ZONE"
+	assert response_json["destination_bin"] == input_data["id_bin"]
+	assert response_json["created_by"] is not None
+	assert response_json["created_on"] is not None
+	logging.info("Creation task finished.")
 
 
 # Test to be performed.
@@ -110,3 +133,18 @@ def test_model(
 	sub_test_update_bin(client_test, data_test_update_bin)
 	sub_test_delete_bin(client_test)
 	logging.info("STOP - model testing")
+
+
+def test_flow(
+					client_test,
+					data_test_create_material,
+					data_test_create_bin,
+					data_test_create_GR_ZONE_bin,
+					data_test_goods_receipt):
+	logging.info("START - flow testing")
+	sub_test_create_material(client_test, data_test_create_material)
+	sub_test_create_bin(client_test, data_test_create_bin)
+	sub_test_create_bin(client_test, data_test_create_GR_ZONE_bin)
+	sub_test_goods_receipt(client_test, data_test_goods_receipt)
+	sub_test_create_task(client_test, data_test_create_bin)
+	logging.info("STOP - flow testing")

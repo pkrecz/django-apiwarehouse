@@ -38,8 +38,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',]
+
 
 ROOT_URLCONF = 'apiwhsproject.urls'
 
@@ -53,8 +53,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+                'django.contrib.messages.context_processors.messages',],
         },
     },
 ]
@@ -115,5 +114,8 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',],
     
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',],
-}
+        'rest_framework.renderers.JSONRenderer',],}
+
+
+SWAGGER_SETTINGS = {
+    "DEFAULT_AUTO_SCHEMA_CLASS": "app_apiwhs.custom.CustomAutoSchema"}
