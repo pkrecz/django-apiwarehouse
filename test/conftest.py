@@ -54,6 +54,13 @@ def data_test_create_bin():
 
 
 @pytest.fixture()
+def data_test_create_bin_movement():
+    return {
+            "id_bin": "0511-PROD",
+            "verification_field": "xYz123@"}
+
+
+@pytest.fixture()
 def data_test_update_bin():
     return {
             "type": "EL",

@@ -2,7 +2,8 @@
 
 from django.urls import path, include
 from rest_framework import routers
-from .views import MaterialViewSet, BinViewSet, HandlingUnitViewSet, TaskViewSet, GoodsReceiptViewSet, GoodsIssueViewSet
+from .views import (MaterialViewSet, BinViewSet, HandlingUnitViewSet, TaskViewSet,
+                    GoodsReceiptViewSet, GoodsIssueViewSet, MovementViewSet)
 
 
 router = routers.DefaultRouter()
@@ -12,6 +13,7 @@ router.register(r"handlingunit", HandlingUnitViewSet, basename="handlingunits")
 router.register(r"task", TaskViewSet, basename="tasks")
 router.register(r"goodsreceipt", GoodsReceiptViewSet, basename="goodsreceipts")
 router.register(r"goodsissue", GoodsIssueViewSet, basename="goodsissues")
+router.register(r"movement", MovementViewSet, basename="movements")
 
 
 urlpatterns = [

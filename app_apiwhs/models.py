@@ -8,7 +8,6 @@ from django.core.validators import RegexValidator, MinValueValidator
 """ Material Model """
 class MaterialModel(models.Model):
 
-
     id_material = models.AutoField(
                                 primary_key=True)
     material = models.CharField(

@@ -148,6 +148,21 @@ def sub_test_goods_issue(client):
 	logging.info("Goods Issue testing finished.")
 
 
+def sub_test_movement(client):
+	id_handlingunit = int(os.environ["HU_ID"])
+	id_destination_bin = os.environ["BIN_ID"]
+	url = reverse("movements-list")
+	input_data = {
+					"handlingunit": id_handlingunit,
+					"destination_bin": id_destination_bin}
+	response = client.post(path=url, data=input_data, format="json")
+	response_json = response.json()
+	logging.info("Movement testing ...")
+	assert response.status_code == 200
+	assert response_json == {"message": "Movement completed."}
+	logging.info("Movement testing finished.")
+
+
 # Test to be performed.
 def test_model(
 					client_test,
@@ -169,11 +184,14 @@ def test_flow(
 					client_test,
 					data_test_create_material,
 					data_test_create_bin,
+					data_test_create_bin_movement,
 					data_test_goods_receipt):
 	logging.info("START - flow testing")
 	sub_test_create_material(client_test, data_test_create_material)
 	sub_test_create_bin(client_test, data_test_create_bin)
 	sub_test_goods_receipt(client_test, data_test_goods_receipt)
 	sub_test_create_task(client_test, data_test_create_bin)
+	sub_test_create_bin(client_test,data_test_create_bin_movement)
+	sub_test_movement(client_test)
 	sub_test_goods_issue(client_test)
 	logging.info("STOP - flow testing")

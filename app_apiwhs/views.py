@@ -11,7 +11,7 @@ from .serializers import (MaterialCreateSerializer, MaterialUpdateSerializer, Ma
                           BinCreateSerializer, BinUpdateSerializer, BinLRDSerializer,
                           HandlingUnitLRSerializer,
                           TaskLRSerializer,
-                          GoodsReceiptSerializer, GoodsIssueSerializer)
+                          GoodsReceiptSerializer, GoodsIssueSerializer, MovementSerializer)
 from .filters import MaterialFilter, TaskFilter
 from .functions import (create_handling_unit, create_task,
                         get_next_empty_bin_instance, set_bin_occupied, set_bin_empty, get_bin_instance,
@@ -193,5 +193,35 @@ class GoodsIssueViewSet(viewsets.GenericViewSet):
                 set_bin_empty(bin=bin_instance)
                 set_handlingunit_inactive(handlingunit=handlingunit_instance)
                 return JsonResponse(data={"message": "Goods Issue completed."}, status=status.HTTP_200_OK)
+        except APIException as exception:
+            return JsonResponse(data=exception.detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+""" Movement """
+class MovementViewSet(viewsets.GenericViewSet):
+    http_method_names = ["post"]
+    serializer_class = MovementSerializer
+    swagger_viewset_tag = ["Movement"]
+
+    def create(self, request):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                handlingunit_instance = serializer.validated_data["handlingunit"]
+                source_bin_instance = get_handlingunit_location(handlingunit_instance.id_handlingunit)
+                destination_bin_instance = serializer.validated_data["destination_bin"]
+                if destination_bin_instance.empty == False:
+                    raise APIException(detail={"message": "Destination bin is occupied."})
+                create_task(
+                                request=request,
+                                handlingunit=handlingunit_instance,
+                                source=source_bin_instance,
+                                destination=destination_bin_instance)
+                set_bin_empty(bin=source_bin_instance)
+                set_bin_occupied(
+                                bin=destination_bin_instance,
+                                handlingunit=handlingunit_instance)
+                return JsonResponse(data={"message": "Movement completed."}, status=status.HTTP_200_OK)
         except APIException as exception:
             return JsonResponse(data=exception.detail, status=status.HTTP_400_BAD_REQUEST)

@@ -90,3 +90,11 @@ class GoodsReceiptSerializer(serializers.Serializer):
 class GoodsIssueSerializer(serializers.Serializer):
 
     handlingunit = serializers.IntegerField()
+
+
+""" Movement """
+class MovementSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TaskModel
+        fields = ["handlingunit", "destination_bin"]

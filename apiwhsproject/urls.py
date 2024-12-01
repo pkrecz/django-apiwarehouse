@@ -24,6 +24,5 @@ urlpatterns = [
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("favicon.ico/", RedirectView.as_view(url=staticfiles_storage.url("images/favicon.ico"))),
     path("admin/", admin.site.urls),
-    #path("user/", include("userapp.urls")),
     path("", include("app_apiwhs.urls")),
 ]
