@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rest_framework.exceptions import APIException
-from .models import MaterialModel, BinModel, TaskModel
+from .models import MaterialModel, BinModel, TaskModel, HandlingUnitModel
 from .serializers import HandlingUnitCreateSerializer
 
 
@@ -34,7 +34,7 @@ def create_handling_unit(material, quantity):
     return instance
 
 
-def get_next_empty_bin():
+def get_next_empty_bin_instance():
     instance = BinModel.objects.filter(empty=True).order_by("id_bin")
     if not instance.exists():
         raise APIException(detail={"message": "No empty bin."})
@@ -42,10 +42,10 @@ def get_next_empty_bin():
     return instance
 
 
-def get_GR_ZONE_bin():
-    instance = BinModel.objects.filter(id_bin="GR-ZONE")
+def get_bin_instance(id_bin):
+    instance = BinModel.objects.filter(id_bin=id_bin)
     if not instance.exists():
-        raise APIException(detail={"message": "Bin 'GR-ZONE' was not found."})
+        raise APIException(detail={"message": f"Bin {id_bin} was not found."})
     instance = instance.first()
     return instance
 
@@ -56,12 +56,10 @@ def set_bin_occupied(bin, handlingunit):
     bin.save()
 
 
-
-
-def set_bin_empty(bin, handlingunit):
-    pass
-
-
+def set_bin_empty(bin):
+    bin.empty = True
+    bin.handlingunit = None
+    bin.save()
 
 
 def create_task(request, handlingunit, source, destination):
@@ -73,4 +71,25 @@ def create_task(request, handlingunit, source, destination):
                                             created_by=request.user)
         return instance
     except:
-        raise APIException(detail={"message": "Error in warehouse creation."})
+        raise APIException(detail={"message": "Error in warehouse task creation."})
+
+
+def get_handlingunit_location(handlingunit):
+    instance = BinModel.objects.filter(handlingunit=handlingunit)
+    if not instance.exists():
+        raise APIException(detail={"message": "Handling Unit was not found or is inactive."})
+    instance = instance.first()
+    return instance
+
+
+def get_handlingunit_instance(handlingunit):
+    instance = HandlingUnitModel.objects.filter(id_handlingunit=handlingunit)
+    if not instance.exists():
+        raise APIException(detail={"message": "Handling Unit was not found."})
+    instance = instance.first()
+    return instance
+
+
+def set_handlingunit_inactive(handlingunit):
+    handlingunit.is_active = False
+    handlingunit.save()

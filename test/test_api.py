@@ -116,6 +116,36 @@ def sub_test_create_task(client, input_data):
 	assert response_json["created_by"] is not None
 	assert response_json["created_on"] is not None
 	logging.info("Creation task finished.")
+	os.environ["HU_ID"] = str(response_json["handlingunit"])
+	os.environ["BIN_ID"] = input_data["id_bin"]
+
+
+def sub_test_goods_issue(client):
+	id_handlingunit = int(os.environ["HU_ID"])
+	id_bin = os.environ["BIN_ID"]
+
+	url = reverse("goodsissues-list")
+	input_data = {"handlingunit": id_handlingunit}
+	response = client.post(path=url, data=input_data, format="json")
+	response_json = response.json()
+
+	url_hu = reverse("handlingunits-detail", kwargs={"pk": id_handlingunit})
+	response_hu = client.get(path=url_hu)
+	response_json_hu = response_hu.json()
+
+	url_bin = reverse("bins-detail", kwargs={"pk": id_bin})
+	response_bin = client.get(path=url_bin)
+	response_json_bin = response_bin.json()
+
+	logging.info("Goods Issue testing ...")
+	assert response.status_code == 200
+	assert response_json == {"message": "Goods Issue completed."}
+	assert response_hu.status_code == 200
+	assert response_json_hu["is_active"] == False
+	assert response_bin.status_code == 200
+	assert response_json_bin["handlingunit"] is None
+	assert response_json_bin["empty"] == True
+	logging.info("Goods Issue testing finished.")
 
 
 # Test to be performed.
@@ -139,12 +169,11 @@ def test_flow(
 					client_test,
 					data_test_create_material,
 					data_test_create_bin,
-					data_test_create_GR_ZONE_bin,
 					data_test_goods_receipt):
 	logging.info("START - flow testing")
 	sub_test_create_material(client_test, data_test_create_material)
 	sub_test_create_bin(client_test, data_test_create_bin)
-	sub_test_create_bin(client_test, data_test_create_GR_ZONE_bin)
 	sub_test_goods_receipt(client_test, data_test_goods_receipt)
 	sub_test_create_task(client_test, data_test_create_bin)
+	sub_test_goods_issue(client_test)
 	logging.info("STOP - flow testing")

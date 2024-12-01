@@ -84,3 +84,9 @@ class GoodsReceiptSerializer(serializers.Serializer):
                                         regex="^[0-9A-Z]*$")
     quantity = serializers.IntegerField(
                                         min_value=1)
+
+
+""" GoodsIssue """
+class GoodsIssueSerializer(serializers.Serializer):
+
+    handlingunit = serializers.IntegerField()

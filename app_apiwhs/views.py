@@ -11,10 +11,11 @@ from .serializers import (MaterialCreateSerializer, MaterialUpdateSerializer, Ma
                           BinCreateSerializer, BinUpdateSerializer, BinLRDSerializer,
                           HandlingUnitLRSerializer,
                           TaskLRSerializer,
-                          GoodsReceiptSerializer)
+                          GoodsReceiptSerializer, GoodsIssueSerializer)
 from .filters import MaterialFilter, TaskFilter
 from .functions import (create_handling_unit, create_task,
-                        get_next_empty_bin, set_bin_occupied, set_bin_empty, get_GR_ZONE_bin)
+                        get_next_empty_bin_instance, set_bin_occupied, set_bin_empty, get_bin_instance,
+                        get_handlingunit_location, get_handlingunit_instance, set_handlingunit_inactive)
 
 
 """ Material """
@@ -154,8 +155,8 @@ class GoodsReceiptViewSet(viewsets.GenericViewSet):
                 handlingunit_instance = create_handling_unit(
                                                     material=serializer.validated_data["material"],
                                                     quantity=serializer.validated_data["quantity"])
-                empty_bin_instance = get_next_empty_bin()
-                gr_zone_bin_instance = get_GR_ZONE_bin()
+                empty_bin_instance = get_next_empty_bin_instance()
+                gr_zone_bin_instance = get_bin_instance("GR-ZONE")
                 create_task(
                                 request=request,
                                 handlingunit=handlingunit_instance,
@@ -165,5 +166,32 @@ class GoodsReceiptViewSet(viewsets.GenericViewSet):
                                 bin=empty_bin_instance,
                                 handlingunit=handlingunit_instance)
                 return JsonResponse(data={"message": "Goods Receipt completed."}, status=status.HTTP_200_OK)
+        except APIException as exception:
+            return JsonResponse(data=exception.detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+""" GoodsIssue """
+class GoodsIssueViewSet(viewsets.GenericViewSet):
+    http_method_names = ["post"]
+    serializer_class = GoodsIssueSerializer
+    swagger_viewset_tag = ["Goods Issue"]
+
+    def create(self, request):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                id_handlingunit = serializer.validated_data["handlingunit"]
+                bin_instance = get_handlingunit_location(id_handlingunit)
+                handlingunit_instance = get_handlingunit_instance(id_handlingunit)
+                gi_zone_bin_instance = get_bin_instance("GI-ZONE")
+                create_task(
+                                request=request,
+                                handlingunit=handlingunit_instance,
+                                source=bin_instance,
+                                destination=gi_zone_bin_instance)
+                set_bin_empty(bin=bin_instance)
+                set_handlingunit_inactive(handlingunit=handlingunit_instance)
+                return JsonResponse(data={"message": "Goods Issue completed."}, status=status.HTTP_200_OK)
         except APIException as exception:
             return JsonResponse(data=exception.detail, status=status.HTTP_400_BAD_REQUEST)

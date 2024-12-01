@@ -61,13 +61,6 @@ def data_test_update_bin():
 
 
 @pytest.fixture()
-def data_test_create_GR_ZONE_bin():
-    return {
-            "id_bin": "GR-ZONE",
-            "verification_field": "xYz123@"}
-
-
-@pytest.fixture()
 def data_test_goods_receipt():
     return {
             "material": "BDP100I",
