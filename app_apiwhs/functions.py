@@ -74,7 +74,7 @@ def create_task(request, handlingunit, source, destination):
         raise APIException(detail={"message": "Error in warehouse task creation."})
 
 
-def get_handlingunit_location(handlingunit):
+def get_handlingunit_location_instance(handlingunit):
     instance = BinModel.objects.filter(handlingunit=handlingunit)
     if not instance.exists():
         raise APIException(detail={"message": "Handling Unit was not found or is inactive."})

@@ -15,7 +15,7 @@ from .serializers import (MaterialCreateSerializer, MaterialUpdateSerializer, Ma
 from .filters import MaterialFilter, TaskFilter
 from .functions import (create_handling_unit, create_task,
                         get_next_empty_bin_instance, set_bin_occupied, set_bin_empty, get_bin_instance,
-                        get_handlingunit_location, get_handlingunit_instance, set_handlingunit_inactive)
+                        get_handlingunit_location_instance, get_handlingunit_instance, set_handlingunit_inactive)
 
 
 """ Material """
@@ -152,9 +152,11 @@ class GoodsReceiptViewSet(viewsets.GenericViewSet):
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
+                material = serializer.validated_data.get("material")
+                quantity = serializer.validated_data.get("quantity")
                 handlingunit_instance = create_handling_unit(
-                                                    material=serializer.validated_data["material"],
-                                                    quantity=serializer.validated_data["quantity"])
+                                                                material=material,
+                                                                quantity=quantity)
                 empty_bin_instance = get_next_empty_bin_instance()
                 gr_zone_bin_instance = get_bin_instance("GR-ZONE")
                 create_task(
@@ -181,8 +183,8 @@ class GoodsIssueViewSet(viewsets.GenericViewSet):
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
-                id_handlingunit = serializer.validated_data["handlingunit"]
-                bin_instance = get_handlingunit_location(id_handlingunit)
+                id_handlingunit = serializer.validated_data.get("handlingunit")
+                bin_instance = get_handlingunit_location_instance(id_handlingunit)
                 handlingunit_instance = get_handlingunit_instance(id_handlingunit)
                 gi_zone_bin_instance = get_bin_instance("GI-ZONE")
                 create_task(
@@ -208,9 +210,9 @@ class MovementViewSet(viewsets.GenericViewSet):
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
-                handlingunit_instance = serializer.validated_data["handlingunit"]
-                source_bin_instance = get_handlingunit_location(handlingunit_instance.id_handlingunit)
-                destination_bin_instance = serializer.validated_data["destination_bin"]
+                handlingunit_instance = serializer.validated_data.get("handlingunit")
+                source_bin_instance = get_handlingunit_location_instance(handlingunit_instance.id_handlingunit)
+                destination_bin_instance = serializer.validated_data.get("destination_bin")
                 if destination_bin_instance.empty == False:
                     raise APIException(detail={"message": "Destination bin is occupied."})
                 create_task(
