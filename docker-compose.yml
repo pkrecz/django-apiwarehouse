@@ -11,12 +11,15 @@ services:
       - ./.env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+      - REDIS_URL=redis://service_redis:6379/
     volumes:
       - static-data:/home/apiwarehouse/app/${STATIC_ROOT}
     expose:
       - "8000"
     depends_on:
       service_db:
+        condition: service_healthy
+      service_redis:
         condition: service_healthy
     restart: always
     networks:
@@ -58,12 +61,27 @@ services:
     restart: always
     networks:
       - network-external
+
+
+  service_redis:
+    image: redis:7.0
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+      start_period: 3s
+    expose:
+      - "6379"
+    volumes:
+      - redis-data:/data
+    networks:
       - network-internal
 
 
 volumes:
   apiwarehouse-data:
   static-data:
+  redis-data:
 
 
 networks:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import debug_toolbar
 from django.contrib import admin
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path, include
@@ -24,5 +25,5 @@ urlpatterns = [
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("favicon.ico/", RedirectView.as_view(url=staticfiles_storage.url("images/favicon.ico"))),
     path("admin/", admin.site.urls),
-    path("", include("app_apiwhs.urls")),
-]
+    path("__debug__/", include(debug_toolbar.urls)),
+    path("", include("app_apiwhs.urls")),]

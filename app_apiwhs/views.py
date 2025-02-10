@@ -7,15 +7,17 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import ProtectedError
 from .models import MaterialModel, BinModel, HandlingUnitModel, TaskModel
-from .serializers import (MaterialCreateSerializer, MaterialUpdateSerializer, MaterialLRDSerializer,
-                          BinCreateSerializer, BinUpdateSerializer, BinLRDSerializer,
-                          HandlingUnitLRSerializer,
-                          TaskLRSerializer,
-                          GoodsReceiptSerializer, GoodsIssueSerializer, MovementSerializer)
+from .serializers import (
+                            MaterialCreateSerializer, MaterialUpdateSerializer, MaterialLRDSerializer,
+                            BinCreateSerializer, BinUpdateSerializer, BinLRDSerializer,
+                            HandlingUnitLRSerializer,
+                            TaskLRSerializer,
+                            GoodsReceiptSerializer, GoodsIssueSerializer, MovementSerializer)
 from .filters import MaterialFilter, TaskFilter
-from .functions import (create_handling_unit, create_task,
-                        get_next_empty_bin_instance, set_bin_occupied, set_bin_empty, get_bin_instance,
-                        get_handlingunit_location_instance, get_handlingunit_instance, set_handlingunit_inactive)
+from .functions import (
+                            create_handling_unit, create_task,
+                            get_next_empty_bin_instance, set_bin_occupied, set_bin_empty, get_bin_instance,
+                            get_handlingunit_location_instance, get_handlingunit_instance, set_handlingunit_inactive)
 
 
 """ Material """
